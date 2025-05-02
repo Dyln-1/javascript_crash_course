@@ -11,14 +11,16 @@ const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let audioSource;
 let analyser;
 let baseHue = 0;
+let visualizerStarted = false;
+
 function changeColorOnClick(){
     baseHue = Math.floor(Math.random() * 360);
 }
 
 function startVisualizer() {
-    if (audioSource) {
-        audioSource.disconnect();
-    }
+    if (visualizerStarted) return; 
+    visualizerStarted = true;
+    
 
     audioSource = audioContext.createMediaElementSource(audio1);
     analyser = audioContext.createAnalyser();
@@ -61,7 +63,8 @@ function startVisualizer() {
     animate();
 }
 
-container.addEventListener('click', () => {
+container.addEventListener('click', async () => {
+    await audioContext.resume();
     audio1.play();
     changeColorOnClick();
     startVisualizer();
@@ -75,6 +78,4 @@ file.addEventListener('change', function () {
     const files = this.files;
     audio1.src = URL.createObjectURL(files[0]);
     audio1.load();
-    audio1.play();
-    startVisualizer();
 });
