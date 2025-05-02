@@ -35,14 +35,7 @@ function startVisualizer() {
         analyser.getByteFrequencyData(dataArray);
         console.log(dataArray.slice(0, 10))
        
-        let rotationSpeed = 0.1;
-        let mouseX = 0;
-        canvas.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            const percentage = mouseX / window.innerWidth;
-            rotationSpeed = 0.001 + percentage * 0.05;
-        });
-
+        
         for (let i = 0; i < bufferLength; i++) {
             const barHeight = dataArray[i] * 1.4 + 3;
             ctx.save();
@@ -78,6 +71,12 @@ container.addEventListener('click', async () => {
     audio1.play();
     changeColorOnClick();
 });
+
+canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            const percentage = mouseX / window.innerWidth;
+            rotationSpeed = 0.001 + percentage * 0.05;
+        });
 
 canvas.addEventListener('click', () =>{
     changeColorOnClick();
