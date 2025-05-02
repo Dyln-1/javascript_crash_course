@@ -37,12 +37,6 @@ function startVisualizer() {
         let x = 0;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         analyser.getByteFrequencyData(dataArray);
-        let rotationSpeed = 0.1;
-        let mouseX = 0;
-        canvas.addEventListener('mousemove', (e) => {
-            mouseX = e.clientX;
-            const percentage = mouseX / window.innerWidth;
-            rotationSpeed = 0.001 + percentage * 0.05;
         });
 
         for (let i = 0; i < bufferLength; i++) {
