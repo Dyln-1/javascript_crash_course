@@ -11,16 +11,12 @@ const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 let audioSource;
 let analyser;
 let baseHue = 0;
-let visualizerStarted = false;
-
 function changeColorOnClick(){
     baseHue = Math.floor(Math.random() * 360);
 }
 
 function startVisualizer() {
-    if (visualizerStarted) return; 
-    visualizerStarted = true;
-    
+    if (audioSource || analyser) return;
 
     audioSource = audioContext.createMediaElementSource(audio1);
     analyser = audioContext.createAnalyser();
@@ -37,6 +33,14 @@ function startVisualizer() {
         let x = 0;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         analyser.getByteFrequencyData(dataArray);
+        console.log(dataArray.slice(0, 10))
+       
+        let rotationSpeed = 0.1;
+        let mouseX = 0;
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            const percentage = mouseX / window.innerWidth;
+            rotationSpeed = 0.001 + percentage * 0.05;
         });
 
         for (let i = 0; i < bufferLength; i++) {
@@ -51,6 +55,11 @@ function startVisualizer() {
             ctx.restore();
         }
 
+        analyser.getByteFrequencyData(dataArray);
+        if (dataArray.every(val => val === 0)) {
+            console.warn("AudioContext may be suspended or not connected properly");
+        }
+
         requestAnimationFrame(animate);
     }
 
@@ -58,23 +67,31 @@ function startVisualizer() {
 }
 
 container.addEventListener('click', async () => {
+    if (audioContext.state === 'suspended'){
     await audioContext.resume();
+    }
+    
+    if (!audioSource || !analyser){
+        startVisualizer();
+    }
+
     audio1.play();
     changeColorOnClick();
-    startVisualizer();
 });
 
 canvas.addEventListener('click', () =>{
     changeColorOnClick();
 });
 
-file.addEventListener('change', function () {
+file.addEventListener('change', async function () {
     const files = this.files;
     if (files.length > 0) {
-        await audioContext.resume();
-    }
-    audio.play();
-    startVisualizer();
     audio1.src = URL.createObjectURL(files[0]);
-    audio1.load();
+    await audio1.load();
+    await audioContext.resume();
+   
+    audio1.play();
+    startVisualizer();
+    }
 });
+
